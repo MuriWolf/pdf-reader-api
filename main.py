@@ -1,41 +1,34 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from typing import List
 
 app = FastAPI()
 
 class Fine_content(BaseModel):
-    content: str
+    name: str
+    lastModified: int
+    text: str
 
 class Traffic_violation(BaseModel):
+    id: int
+    id_user: int
     nome_do_condutor: str
+    nome_pessoa: str
     cpf: str
-    placa_do_veiculo: str
-    modelo_do_veiculo: str
-    marca_do_veiculo: str
-    data_e_hora_da_infracao: str
-    local_da_infracao: str
-    tipo_de_infracao: str
-    valor_da_multa: str
-    ponto_de_referencia: str
-    numero_do_auto_de_infracao: str
-    data_de_vencimento: str
-    identificacao_do_agente: str
+    placa_veiculo: str
+    infracao: str
+    gravidade: str
+    data_infracao: str # verificar o TYPE
+    hora_infracao: str # verificar o TYPE
+    endereco_infracao: str
 
 class User(BaseModel):
     id: int
     name: str
     emai: str
 
-
-@app.post("/fine-text")
-async def post_fine_text(fine_text: Fine_content):
-    # do logic, if success
-
-    # leitura do pdf
-
-    # gravação no banco de dados
-
-
+@app.post("/fines")
+async def post_fine_text(fine_text: List[Fine_content]):
     return { "msg": "sucess", "code": 200 }
 
 @app.get("/fines/{fine_id}")
@@ -43,40 +36,41 @@ async def get_fine(fine_id: int):
 
     # do logic to communicate with the backend
     fine: Traffic_violation = {
-        "nome_do_condutor": "Fulano da Silva Neto",
+        "id": 12345,
+        "id_user": 1,
+        "nome_do_condutor": "João Silva",
+        "nome_pessoa": "Maria Santos",
         "cpf": "123.456.789-00",
-        "placa_do_veiculo": "ABC-1234",
-        "modelo_do_veiculo": "Sedan",
-        "marca_do_veiculo": "Chevrolet",
-        "data_e_hora_da_infracao": "01/05/2024 - 14:30",
-        "local_da_infracao": "Rua Principal, Bairro Central, Cidade A",
-        "tipo_de_infracao": "Excesso de Velocidade",
-        "valor_da_multa": "R$ 200,00",
-        "ponto_de_referencia": "Próximo ao Posto de Gasolina X",
-        "numero_do_auto_de_infracao": "2024001",
-        "data_de_vencimento": "15/05/2024",
-        "identificacao_do_agente": "Agente Silva - Matrícula: 123456"
+        "placa_veiculo": "ABC-1234",
+        "infracao": "Excesso de velocidade",
+        "gravidade": "Grave",
+        "data_infracao": "2024-05-15",
+        "hora_infracao": "10:30:00",
+        "endereco_infracao": "Rua das Flores, 123 - Centro, São Paulo/SP"
     }
     return fine
 
 @app.get("/fines")
-async def get_fines():
+async def get_fines(id_user: int | None = None):
     # do logic to communicate with the backend
     fine: Traffic_violation = {
-        "nome_do_condutor": "Fulano da Silva Neto",
+        "id": 12345,
+        "id_user": 1,
+        "nome_do_condutor": "João Silva",
+        "nome_pessoa": "Maria Santos",
         "cpf": "123.456.789-00",
-        "placa_do_veiculo": "ABC-1234",
-        "modelo_do_veiculo": "Sedan",
-        "marca_do_veiculo": "Chevrolet",
-        "data_e_hora_da_infracao": "01/05/2024 - 14:30",
-        "local_da_infracao": "Rua Principal, Bairro Central, Cidade A",
-        "tipo_de_infracao": "Excesso de Velocidade",
-        "valor_da_multa": "R$ 200,00",
-        "ponto_de_referencia": "Próximo ao Posto de Gasolina X",
-        "numero_do_auto_de_infracao": "2024001",
-        "data_de_vencimento": "15/05/2024",
-        "identificacao_do_agente": "Agente Silva - Matrícula: 123456"
+        "placa_veiculo": "ABC-1234",
+        "infracao": "Excesso de velocidade",
+        "gravidade": "Grave",
+        "data_infracao": "2024-05-15",
+        "hora_infracao": "10:30:00",
+        "endereco_infracao": "Rua das Flores, 123 - Centro, São Paulo/SP"
     }
+
+    if (id_user):
+        pass
+    else:
+        pass
 
     fines = [fine, fine, fine, fine]
 
@@ -84,6 +78,11 @@ async def get_fines():
 
 @app.get("/users/{user_id}")
 async def get_user(user_id: int):
-    user: User = { "id": user_id, "name": "Murillo", "email": "email@gmail.com"}
+    user: User = { 
+        "id": user_id,
+        "name": "Murillo",
+        "email": "email@gmail.com",
+        "quantidade_posts": 3 
+    }
 
     return user
