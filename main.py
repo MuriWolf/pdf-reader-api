@@ -11,15 +11,17 @@ class Fine_content(BaseModel):
 
 class Traffic_violation(BaseModel):
     id: int
+    titulo_pdf: str
+    data_envio: int
     id_user: int
-    nome_do_condutor: str
+    nome_condutor: str
     nome_pessoa: str
     cpf: str
     placa_veiculo: str
     infracao: str
     gravidade: str
-    data_infracao: str # verificar o TYPE
-    hora_infracao: str # verificar o TYPE
+    data_infracao: int
+    hora_infracao: str
     endereco_infracao: str
 
 class User(BaseModel):
@@ -27,46 +29,34 @@ class User(BaseModel):
     name: str
     emai: str
 
+fine: Traffic_violation = {
+    "id": 12345,
+    "titulo_pdf": "Pdf multa",
+    "data_envio": 1626739200000 ,
+    "id_user": 1,
+    "nome_condutor": "João Silva",
+    "nome_pessoa": "Maria Santos",
+    "cpf": "123.456.789-00",
+    "placa_veiculo": "ABC-1234",
+    "infracao": "Excesso de velocidade",
+    "gravidade": "Grave",
+    "data_infracao": 1532044800000,
+    "hora_infracao": "10:30:00",
+    "endereco_infracao": "Rua das Flores, 123 - Centro, São Paulo/SP"
+}
+
 @app.post("/fines")
 async def post_fine_text(fine_text: List[Fine_content]):
     return { "msg": "sucess", "code": 200 }
 
 @app.get("/fines/{fine_id}")
 async def get_fine(fine_id: int):
-
     # do logic to communicate with the backend
-    fine: Traffic_violation = {
-        "id": 12345,
-        "id_user": 1,
-        "nome_do_condutor": "João Silva",
-        "nome_pessoa": "Maria Santos",
-        "cpf": "123.456.789-00",
-        "placa_veiculo": "ABC-1234",
-        "infracao": "Excesso de velocidade",
-        "gravidade": "Grave",
-        "data_infracao": "2024-05-15",
-        "hora_infracao": "10:30:00",
-        "endereco_infracao": "Rua das Flores, 123 - Centro, São Paulo/SP"
-    }
     return fine
 
 @app.get("/fines")
 async def get_fines(id_user: int | None = None):
     # do logic to communicate with the backend
-    fine: Traffic_violation = {
-        "id": 12345,
-        "id_user": 1,
-        "nome_do_condutor": "João Silva",
-        "nome_pessoa": "Maria Santos",
-        "cpf": "123.456.789-00",
-        "placa_veiculo": "ABC-1234",
-        "infracao": "Excesso de velocidade",
-        "gravidade": "Grave",
-        "data_infracao": "2024-05-15",
-        "hora_infracao": "10:30:00",
-        "endereco_infracao": "Rua das Flores, 123 - Centro, São Paulo/SP"
-    }
-
     if (id_user):
         pass
     else:
