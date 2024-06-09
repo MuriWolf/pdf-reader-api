@@ -20,7 +20,7 @@ class Traffic_violation(BaseModel):
     placa_veiculo: str
     infracao: str
     gravidade: str
-    data_infracao: int
+    data_infracao: str
     hora_infracao: str
     endereco_infracao: str
 
@@ -40,10 +40,28 @@ fine: Traffic_violation = {
     "placa_veiculo": "ABC-1234",
     "infracao": "Excesso de velocidade",
     "gravidade": "Grave",
-    "data_infracao": 1532044800000,
+    "data_infracao": "21/04/2019",
     "hora_infracao": "10:30:00",
     "endereco_infracao": "Rua das Flores, 123 - Centro, São Paulo/SP"
 }
+
+users: List[User] = [
+    { 
+        "id": 1,
+        "name": "Hermann Hesse",
+        "email": "lobao@gmail.com",
+    },
+    { 
+        "id": 2,
+        "name": "Erik Satie",
+        "email": "erikaodms@gmail.com",
+    },
+     { 
+        "id": 3,
+        "name": "Gustave Dore",
+        "email": "sorime@gmail.com",
+    }
+]
 
 @app.post("/fines")
 async def post_fine_text(fine_text: List[Fine_content]):
@@ -68,11 +86,8 @@ async def get_fines(id_user: int | None = None):
 
 @app.get("/users/{user_id}")
 async def get_user(user_id: int):
-    user: User = { 
-        "id": user_id,
-        "name": "Murillo",
-        "email": "email@gmail.com",
-        "quantidade_posts": 3 
-    }
+    return users[0]
 
-    return user
+@app.get("/users")
+async def get_user():
+    return users
