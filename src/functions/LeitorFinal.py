@@ -1,5 +1,5 @@
 import re
-import leitorPdf.ExtrairDados as ExtrairDados 
+import src.functions.ExtrairDados as ExtrairDados 
 def main(doc_texto):
     termos_chave = [
         {"nome": "nome_pessoa", "pesquisar": "NOME DO PROPRIETÁRIO"},
