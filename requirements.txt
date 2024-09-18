@@ -2,3 +2,7 @@ fastapi==0.111.0
 pydantic==2.7.3
 pypdf==4.2.0
 SQLAlchemy==2.0.30
+PyMySQL==1.1.ns1
+pytest==8.3.3
+pwdlib==0.2.1
+PyJWT==2.3.0

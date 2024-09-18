@@ -26,7 +26,7 @@ class PDF(Base):
     nro_infraest = Column(String(20), nullable=False)
     identificacao_equipamento = Column(String(30), nullable=False)
     afericao_certificacao = Column(String(20), nullable=False)
-    agente_transito = Column(String(1200), nullable=False)
+    agente_transito = Column(String(100), nullable=False)
     data_envio = Column(BigInteger, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id_user"))
 
@@ -37,9 +37,9 @@ class User(Base):
 
     id_user = Column(Integer, primary_key=True)
     email = Column(String(50), unique=True)
-    senha = Column(String(20))
+    senha = Column(String(255))
     nome_user = Column(String(30))
     username = Column(String(30), unique=True)
-    foto = Column(String(20))
+    foto = Column(String(200))
 
     userData = relationship("PDF", back_populates="user")

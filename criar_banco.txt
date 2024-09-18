@@ -1,0 +1,55 @@
+create database trabalho_douglas
+default character set utf8mb4
+default collate utf8mb4_general_ci;
+
+use trabalho_douglas;
+
+create table pdf(
+id int not null auto_increment,
+nome_pessoa varchar(30) not null,
+placa_veiculo varchar(20) not null,
+marca_veiculo varchar(20) not null,
+especie varchar(40) not null,
+infracao varchar(200) not null,
+natureza varchar(20) not null,
+pontuacao varchar(20) not null,
+data_envio bigint(20) not null,
+data_infracao varchar(20) not null,
+hora_infracao varchar(300) not null,
+endereco_infracao varchar(200) not null,
+velocidade_regulamentada varchar(20) not null,
+velocidade_media varchar(20) not null,
+velocidade_considerada varchar(20) not null,
+enquadramento varchar(20) not null,
+artigo_ctb varchar(20) not null,
+numero_ait varchar(15) not null,
+data_limite_ind_condutor varchar(20) not null,
+nro_infraest varchar(20) not null,
+identificacao_equipamento varchar(30) not null,
+afericao_certificacao varchar(20) not null,
+agente_transito varchar(100) not null,
+primary key (id)
+)default charset = utf8mb4;
+
+
+
+alter table pdf
+change column id id_pdf int not null auto_increment;
+
+alter table pdf add user_id int not null first;
+
+
+create table users(
+id_user int not null auto_increment,
+email varchar(50),
+senha varchar(255),
+nome_user varchar(30),
+username varchar(30),
+foto varchar(200),
+primary key (id_user)
+)default charset = utf8mb4;
+
+
+alter table pdf
+add foreign key(user_id)
+references users(id_user);
