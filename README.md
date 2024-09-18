@@ -8,17 +8,23 @@ pip install -r requirements.txt
 
 # Banco de Dados
 ## Instalação (Linux)
-fonte: https://pssp.app.br/infraestrutura/linux/banco_de_dados/mariadb/instalar.html
+Instalação MariaDB, no Linux Mint, baixei o arquivo .deb e executei.</br>
+**fonte:** https://pssp.app.br/infraestrutura/linux/banco_de_dados/mariadb/instalar.html
 
-Use o DBeaver para mexer no Banco
-fonte: https://dbeaver.io/download/
+Use o DBeaver para mexer no Banco.</br>
+**fonte:** https://dbeaver.io/download/
 
-Antes de logar no MySQL rode `sudo mysql_secure_installation` e mude a senha como root
-fonte: https://www.youtube.com/watch?v=CnRRCTMvs8Q
+Antes de logar no MySQL 
+```bash
+sudo mysql_secure_installation
+```
+e mude a senha para root. <br>
+
+**fonte:** https://www.youtube.com/watch?v=CnRRCTMvs8Q
 
 ## Configuração Banco de Dados
 ### Criar banco
-Dentro do SQL (após o login com `mysql -u root -p`), rodar o script de criação do banco e das tabelas. O arquivo se chama 'criar_banco.txt' e se encontra na base deste repositório.
+Dentro do SQL (após o login com `mysql -u root -p`), rodar o script de criação do banco e das tabelas. O arquivo se chama '[criar_banco.txt](https://github.com/MuriWolf/pdf-reader-api/blob/main/criar_banco.txt)' e se encontra na base deste repositório. 
 ### Fazer conexão através de um cliente SQL (DBeaver, exemplo)
 - Nome banco: trabalho_douglas
 - Senha: root
