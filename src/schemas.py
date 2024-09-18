@@ -7,6 +7,12 @@ class UserBase(BaseModel):
     username: str
     foto: str
 
+class UserPubllic(BaseModel):
+    email: str
+    nome_user: str
+    username: str
+    foto: str
+
 class PdfContentBase(BaseModel):
     userId: int
     dataEnvio: int

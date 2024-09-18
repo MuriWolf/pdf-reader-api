@@ -50,8 +50,9 @@ async def get_fines(db: db_dependency, id_user: int | None = None, username: str
         raise HTTPException(status_code=404, detail='Nenhum documento foi encontrado.')
     return fines
 
+@app.post("/users", status_code=status.HTTP_201_CREATED)
 def create_user(db: db_dependency, user: UserBase):
-    db_user = db.query(models.User).filter(models.User.username == user.username | models.User.email == user.email).first()
+    db_user = db.query(models.User).filter(models.User.username == user.username or models.User.email == user.email).first()
 
     if (db_user):
         if (db_user.username == user.username):
