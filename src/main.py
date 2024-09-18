@@ -5,7 +5,7 @@ from typing import List, Annotated
 import src.sql_app.models as models
 from src.sql_app.database import engine, SessionLocal
 from sqlalchemy.orm import Session
-from src.functions import LeitorFinal
+from functions import leitor_final
 from src.schemas import UserBase, PdfContentBase, TrafficViolationBase 
 from src.security import get_password_hash
  
@@ -24,7 +24,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 @app.post("/fines", status_code=status.HTTP_201_CREATED)
 async def post_fine_data(fines_data: List[PdfContentBase], db: db_dependency):
     for fine in fines_data: 
-        fine_values = LeitorFinal.main(fine.text)
+        fine_values = leitor_final.main(fine.text)
         # return fine_values
         db_fine = models.PDF(**fine_values, user_id=fine.userId, data_envio=fine.dataEnvio)
         db.add(db_fine)

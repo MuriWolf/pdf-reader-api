@@ -1,5 +1,5 @@
 import re
-import src.functions.ExtrairDados as ExtrairDados 
+import functions.extrair_dados as extrair_dados 
 def main(doc_texto):
     termos_chave = [
         {"nome": "nome_pessoa", "pesquisar": "NOME DO PROPRIETÁRIO"},
@@ -55,7 +55,7 @@ def main(doc_texto):
     texto_formatado = quebra_linha(texto_espaço)
     texto_formatado = re.sub(r"(COD\. LOC\. EQUIP\.\d{4})( DATA DA INFRAÇÃO)", r"\1\n\2", texto_formatado)
 
-    dados_extraidos = ExtrairDados.extrair_dados(texto_formatado, termos_chave)
+    dados_extraidos = extrair_dados.extrair_dados(texto_formatado, termos_chave)
 
     for chave, valor in dados_extraidos.items():
     # Imprimir cada chave e seu valor correspondente
