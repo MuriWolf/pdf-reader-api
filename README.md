@@ -1,5 +1,6 @@
 # Início
-Faça o clone do projeto e vá para sua pasta.
+Este projeto é uma API de uma aplicação que visa, através de PDFs de multas de trânsito, extrair seus dados e armazená-los no site, onde é possível ter maior controle sobre eles. Este projeto é um trabalho de [Universidade](https://unimar.br/), que tem como foco a empresa [DSIN](https://www.dsin.com.br/), crida em Marília e que atua em mais de 100 munícipios. </br>
+> Para ver o frontend do projeto, [clique aqui](https://github.com/MuriWolf/pdf-reader).
 
 # Baixar dependencias
 ```bash
@@ -32,11 +33,7 @@ Dentro do SQL (após o login com `mysql -u root -p`), rodar o script de criaçã
 
 # Rodar a API
 ```bash
-fastapi dev main.py
-```
-caso der erro no código acima, tente esse:
-```bash
-python -m uvicorn main:app 
+fastapi dev src/main.py
 ```
 # Rodar testes 
 ```bash
