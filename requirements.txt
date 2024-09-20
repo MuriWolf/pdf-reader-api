@@ -6,3 +6,5 @@ PyMySQL==1.1.ns1
 pytest==8.3.3
 pwdlib==0.2.1
 PyJWT==2.3.0
+
+python-multipart==0.0.9

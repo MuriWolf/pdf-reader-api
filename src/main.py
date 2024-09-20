@@ -1,14 +1,16 @@
+from http import HTTPStatus
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from typing import List, Annotated
-import src.sql_app.models as models
-from src.sql_app.database import engine, SessionLocal
+import src.models as models
+from src.database import engine, SessionLocal
 from sqlalchemy.orm import Session
-from functions import leitor_final
-from src.schemas import UserBase, PdfContentBase, TrafficViolationBase 
-from src.security import get_password_hash
- 
+from src.functions import leitor_final
+from src.schemas import UserBase, UserPublic, UserUpdate, PdfContentBase, TrafficViolationBase, Token, UserLogin, MessageResponse
+from src.security import get_password_hash, verify_password, create_access_token, get_current_user
+from src.utils import convert_user_to_public
+
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
 
@@ -42,27 +44,27 @@ async def get_fines(db: db_dependency, id_user: int | None = None, username: str
         if (user):
             fines = db.query(models.PDF).filter(models.PDF.user_id == user.id_user).all()
         else:
-            raise HTTPException(status_code=404, detail='Usuario não encontrado.')
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Usuario não encontrado.')
     else:
         fines = db.query(models.PDF).all()
 
     if (len(fines) == 0):
-        raise HTTPException(status_code=404, detail='Nenhum documento foi encontrado.')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Nenhum documento foi encontrado.')
     return fines
 
-@app.post("/users", status_code=status.HTTP_201_CREATED)
+@app.post("/users", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
 def create_user(db: db_dependency, user: UserBase):
     db_user = db.query(models.User).filter(models.User.username == user.username or models.User.email == user.email).first()
 
     if (db_user):
         if (db_user.username == user.username):
             raise HTTPException(
-                status_code=400,
+                status_code=HTTPStatus.BAD_REQUEST,
                 detail='Username já existe.'
             )
         elif (db_user.email == user.email):
             raise HTTPException(
-                status_code=400,
+                status_code=HTTPStatus.BAD_REQUEST,
                 detail='Email já existe.'
             )
         
@@ -79,6 +81,78 @@ def create_user(db: db_dependency, user: UserBase):
     db.commit()
     db.refresh(db_user)
 
+    response_user = convert_user_to_public(db_user)
+    return response_user
+
+@app.patch('/users/{user_id}', response_model=UserPublic, status_code=status.HTTP_200_OK) 
+def update_user(
+    db: db_dependency,
+    user_id: int,
+    user: UserUpdate,
+    current_user: models.User = Depends(get_current_user)
+):
+    # TODO: permitir caso quem esteja mandando seja um admin
+    if current_user.id_user != user_id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões suficientes'
+        )
+
+    db_user = db.query(models.User).filter(models.User.id_user == user_id).first()
+    if not db_user:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='Usuario não encontrado'
+        )
+
+    for key, value in user.model_dump(exclude_unset=True).items():
+        setattr(db_user, key, value)
+
+    db.commit()
+    db.refresh(db_user)
+    response_user = convert_user_to_public(db_user)
+
+    return response_user 
+
+@app.delete("/users/{user_id}", response_model=MessageResponse)
+def delete_user(
+    db: db_dependency,
+    user_id: int
+):
+    db_user = db.query(models.User).filter(models.User.id_user == user_id).first()
+
+    if not db_user:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Usuario não encontrado" 
+        )
+
+    db.delete(db_user)
+    db.commit()
+
+    return {'code': HTTPStatus.OK, 'msg': 'Usuario deletado'}
+
+@app.post("/token", response_model=Token)
+def login_for_access_token(
+    db: db_dependency,
+    form_data: UserLogin
+):
+    user = db.query(models.User).filter(models.User.email == form_data.email).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Email ou usuario incorreto"
+        )
+    
+    if not verify_password(form_data.senha, user.senha):
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Email ou usuario incorreto"
+        ) 
+    
+    access_token = create_access_token(data={ 'sub': user.email })
+
+    return {'access_token': access_token, 'token_type': 'bearer'}
+
 @app.get("/users", status_code=status.HTTP_200_OK)      
 async def get_user(db: db_dependency, user_id: int | None = None, username: str | None = None):
     user = None
@@ -90,7 +164,7 @@ async def get_user(db: db_dependency, user_id: int | None = None, username: str 
         user = db.query(models.User).all()
     
     if user is None:
-        raise HTTPException(status_code=404, detail='Usuario não encontrado.')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Usuario não encontrado.')
     
     return user
     

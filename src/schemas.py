@@ -1,17 +1,41 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+
+class MessageResponse(BaseModel):
+    code: int
+    msg: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: str | None = None
+
+class UserLogin(BaseModel):
+    email: str
+    senha: str
 
 class UserBase(BaseModel):
     email: str
     senha: str
     nome_user: str
-    username: str
-    foto: str
+    username: str 
+    foto: str 
 
-class UserPubllic(BaseModel):
+class UserUpdate(BaseModel):
+    email: str | None = None
+    senha: str | None = None
+    nome_user: str | None = None
+    username: str | None = None
+    foto: str | None = None
+
+class UserPublic(BaseModel):
+    id: int
     email: str
     nome_user: str
     username: str
     foto: str
+    model_config = ConfigDict(from_attributes=True)
 
 class PdfContentBase(BaseModel):
     userId: int
