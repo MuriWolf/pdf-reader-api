@@ -1,10 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from src.security import settings
 
-URL_BASE = 'mysql+pymysql://root:root@localhost:3306/trabalho_douglas'
-
-engine = create_engine(URL_BASE)
+engine = create_engine(settings.URL_BASE)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

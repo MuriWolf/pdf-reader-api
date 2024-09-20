@@ -153,6 +153,14 @@ def login_for_access_token(
 
     return {'access_token': access_token, 'token_type': 'bearer'}
 
+@app.post("refresh_token", response_model=Token)
+def refresh_access_token(
+    user: models.User = Depends(get_current_user)
+):
+    new_access_token = create_access_token(data={'sub': user.email})
+    
+    return {'access_token': new_access_token, 'token_type': 'bearer'}
+
 @app.get("/users", status_code=status.HTTP_200_OK)      
 async def get_user(db: db_dependency, user_id: int | None = None, username: str | None = None):
     user = None
