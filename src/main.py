@@ -7,11 +7,16 @@ import src.models as models
 from src.database import engine, SessionLocal
 from sqlalchemy.orm import Session
 from src.functions import leitor_final
-from src.schemas import UserBase, UserPublic, UserUpdate, PdfContentBase, TrafficViolationBase, Token, UserLogin, MessageResponse
-from src.security import get_password_hash, verify_password, create_access_token, get_current_user
+from src.schemas import UserBase, UserPublic, UserUpdate, PdfContentBase, TrafficViolationBase, Token, UserLogin, MessageResponse, TokenData 
+from src.security import get_password_hash, verify_password, create_token, get_current_user, validate_refresh_token
 from src.utils import convert_user_to_public
+from datetime import timedelta
+from src.settings import Settings
+
+settings = Settings()
 
 app = FastAPI()
+
 models.Base.metadata.create_all(bind=engine)
 
 def get_db():
@@ -74,6 +79,7 @@ def create_user(db: db_dependency, user: UserBase):
         email=user.email,
         nome_user=user.nome_user,
         senha=hashed_password, 
+        role=user.role,
         foto='link'
     )
 
@@ -115,8 +121,15 @@ def update_user(
 @app.delete("/users/{user_id}", response_model=MessageResponse)
 def delete_user(
     db: db_dependency,
-    user_id: int
+    user_id: int,
+    current_user: models.User = Depends(get_current_user)
 ):
+    # TODO: permitir caso quem esteja mandando seja um admin
+    if current_user.id_user != user_id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões suficientes'
+        )
+
     db_user = db.query(models.User).filter(models.User.id_user == user_id).first()
 
     if not db_user:
@@ -149,17 +162,19 @@ def login_for_access_token(
             detail="Email ou usuario incorreto"
         ) 
     
-    access_token = create_access_token(data={ 'sub': user.email })
+    access_token = create_token(data={ 'sub': user.email, 'role': user.role.value }, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    refresh_token = create_token(data={ 'sub': user.email, 'role': user.role.value }, expires_delta=timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES))
 
-    return {'access_token': access_token, 'token_type': 'bearer'}
+    return {'access_token': access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
 
-@app.post("refresh_token", response_model=Token)
+@app.post("/refresh", response_model=Token)
 def refresh_access_token(
-    user: models.User = Depends(get_current_user)
+    token_data: Annotated[tuple[models.User, str], Depends(validate_refresh_token)]
 ):
-    new_access_token = create_access_token(data={'sub': user.email})
-    
-    return {'access_token': new_access_token, 'token_type': 'bearer'}
+    user, refresh_token = token_data
+    new_access_token = create_token(data={'sub': user.email, 'role': user.role.value}, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+
+    return {'access_token': new_access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
 
 @app.get("/users", status_code=status.HTTP_200_OK)      
 async def get_user(db: db_dependency, user_id: int | None = None, username: str | None = None):
@@ -175,4 +190,3 @@ async def get_user(db: db_dependency, user_id: int | None = None, username: str 
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Usuario não encontrado.')
     
     return user
-    

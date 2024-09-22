@@ -1,7 +1,12 @@
-from sqlalchemy import String, Column, ForeignKey, Integer, Date, BigInteger
+import enum
+from sqlalchemy import String, Column, ForeignKey, Integer, Date, BigInteger, Enum
 from sqlalchemy.orm import relationship
 
 from .database import Base
+
+class Role(enum.Enum):
+    user = "user"
+    admin = "admin"
 
 class PDF(Base):
     __tablename__ = 'pdf'
@@ -40,6 +45,7 @@ class User(Base):
     senha = Column(String(255))
     nome_user = Column(String(30))
     username = Column(String(30), unique=True)
+    role = Column(Enum(Role))
     foto = Column(String(200))
 
     userData = relationship("PDF", back_populates="user")

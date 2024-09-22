@@ -45,6 +45,7 @@ email varchar(50),
 senha varchar(255),
 nome_user varchar(30),
 username varchar(30),
+role enum('admin', 'user'),
 foto varchar(200),
 primary key (id_user)
 )default charset = utf8mb4;

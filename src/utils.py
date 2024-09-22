@@ -7,5 +7,6 @@ def convert_user_to_public(user: User) -> UserPublic:
        nome_user=user.nome_user,
        foto=user.foto,
        email=user.email,
+       role=user.role,
        username=user.username
     )
