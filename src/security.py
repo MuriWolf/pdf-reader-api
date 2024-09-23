@@ -39,7 +39,7 @@ async def get_current_user(
     )
 
     try:
-        payload = decode(token, settings.SECRET_KEY, algorithms=[Settings.ALGORITHM])
+        payload = decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: str = payload.get('sub')
         role: str = payload.get('role')
         if not email or not role:

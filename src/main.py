@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from src.functions import leitor_final
 from src.schemas import UserBase, UserPublic, UserUpdate, PdfContentBase, TrafficViolationBase, Token, UserLogin, MessageResponse, TokenData 
 from src.security import get_password_hash, verify_password, create_token, get_current_user, validate_refresh_token
-from src.utils import convert_user_to_public
+from src.utils import convert_user_to_public, is_update_from_commom_user_valid
 from datetime import timedelta
 from src.settings import Settings
 
@@ -90,6 +90,21 @@ def create_user(db: db_dependency, user: UserBase):
     response_user = convert_user_to_public(db_user)
     return response_user
 
+@app.get("/users", status_code=status.HTTP_200_OK)      
+async def get_user(db: db_dependency, user_id: int | None = None, username: str | None = None):
+    user = None
+    if (user_id):
+        user = db.query(models.User).filter(models.User.id_user == user_id).first()
+    elif (username):
+        user = db.query(models.User).filter(models.User.username == username).first()
+    else:
+        user = db.query(models.User).all()
+    
+    if user is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Usuario não encontrado.')
+    
+    return user
+
 @app.patch('/users/{user_id}', response_model=UserPublic, status_code=status.HTTP_200_OK) 
 def update_user(
     db: db_dependency,
@@ -97,8 +112,9 @@ def update_user(
     user: UserUpdate,
     current_user: models.User = Depends(get_current_user)
 ):
-    # TODO: permitir caso quem esteja mandando seja um admin
-    if current_user.id_user != user_id:
+    user_valid_update = is_update_from_commom_user_valid(user=user, attrs_allowed=["foto"]) 
+    print(user) 
+    if current_user.id_user != user_id or (current_user.role.value != "admin" and not user_valid_update):
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões suficientes'
         )
@@ -125,7 +141,7 @@ def delete_user(
     current_user: models.User = Depends(get_current_user)
 ):
     # TODO: permitir caso quem esteja mandando seja um admin
-    if current_user.id_user != user_id:
+    if current_user.id_user != user_id or current_user.role.value != "admin":
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões suficientes'
         )
@@ -175,18 +191,3 @@ def refresh_access_token(
     new_access_token = create_token(data={'sub': user.email, 'role': user.role.value}, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
 
     return {'access_token': new_access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
-
-@app.get("/users", status_code=status.HTTP_200_OK)      
-async def get_user(db: db_dependency, user_id: int | None = None, username: str | None = None):
-    user = None
-    if (user_id):
-        user = db.query(models.User).filter(models.User.id_user == user_id).first()
-    elif (username):
-        user = db.query(models.User).filter(models.User.username == username).first()
-    else:
-        user = db.query(models.User).all()
-    
-    if user is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Usuario não encontrado.')
-    
-    return user
