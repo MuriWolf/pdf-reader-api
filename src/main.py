@@ -80,7 +80,7 @@ def create_user(db: db_dependency, user: UserBase):
         nome_user=user.nome_user,
         senha=hashed_password, 
         role=user.role,
-        foto='link'
+        foto=''
     )
 
     db.add(db_user)    
@@ -91,19 +91,32 @@ def create_user(db: db_dependency, user: UserBase):
     return response_user
 
 @app.get("/users", status_code=status.HTTP_200_OK)      
-async def get_user(db: db_dependency, user_id: int | None = None, username: str | None = None):
+async def get_user(db: db_dependency, user_id: int | None = None, username: str | None = None, email: str | None = None):
     user = None
+    users = None
     if (user_id):
         user = db.query(models.User).filter(models.User.id_user == user_id).first()
+    elif (email):
+        user = db.query(models.User).filter(models.User.email == email).first()
     elif (username):
         user = db.query(models.User).filter(models.User.username == username).first()
     else:
-        user = db.query(models.User).all()
+        users = db.query(models.User).all()
+        users = [convert_user_to_public(u) for u in users]
     
-    if user is None:
+    if user is None and users is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Usuario não encontrado.')
-    
-    return user
+    elif user is None:
+        return users
+    else:
+        return convert_user_to_public(user)
+
+@app.get("/users/me", response_model=UserPublic, status_code=status.HTTP_200_OK)
+def read_users_me(
+        db: db_dependency,
+        current_user: models.User = Depends(get_current_user)
+    ):
+    return convert_user_to_public(current_user)
 
 @app.patch('/users/{user_id}', response_model=UserPublic, status_code=status.HTTP_200_OK) 
 def update_user(
@@ -113,11 +126,12 @@ def update_user(
     current_user: models.User = Depends(get_current_user)
 ):
     user_valid_update = is_update_from_commom_user_valid(user=user, attrs_allowed=["foto"]) 
-    print(user) 
-    if current_user.id_user != user_id or (current_user.role.value != "admin" and not user_valid_update):
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões suficientes'
-        )
+
+    if (current_user.role.value != "admin"):
+        if (current_user.id_user != user_id or not user_valid_update):
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões suficientes'
+            )
 
     db_user = db.query(models.User).filter(models.User.id_user == user_id).first()
     if not db_user:
@@ -182,6 +196,11 @@ def login_for_access_token(
     refresh_token = create_token(data={ 'sub': user.email, 'role': user.role.value }, expires_delta=timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES))
 
     return {'access_token': access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
+
+@app.post("logout")
+async def logout(token: Token):
+    # revoked_tokens.add(token)
+    return { "code": 200, "message": "Deslogado com sucesso" }
 
 @app.post("/refresh", response_model=Token)
 def refresh_access_token(

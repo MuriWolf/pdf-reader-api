@@ -43,10 +43,10 @@ create table users(
 id_user int not null auto_increment,
 email varchar(50),
 senha varchar(255),
-nome_user varchar(30),
-username varchar(30),
+nome_user varchar(60),
+username varchar(60),
 role enum('admin', 'user'),
-foto varchar(200),
+foto varchar(255),
 primary key (id_user)
 )default charset = utf8mb4;
 
