@@ -154,11 +154,11 @@ def delete_user(
     user_id: int,
     current_user: models.User = Depends(get_current_user)
 ):
-    # TODO: permitir caso quem esteja mandando seja um admin
-    if current_user.id_user != user_id or current_user.role.value != "admin":
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões suficientes'
-        )
+    if (current_user.role.value != "admin"):
+        if (current_user.id_user != user_id):
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões suficientes'
+            )
 
     db_user = db.query(models.User).filter(models.User.id_user == user_id).first()
 
