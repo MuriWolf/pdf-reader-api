@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "apexcharts": "^4.0.0",
+    "echarts": "^5.5.1",
+    "svelte-apexcharts": "^1.0.2"
+  }
+}

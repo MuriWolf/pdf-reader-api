@@ -1,5 +1,6 @@
 import re
 import src.functions.extrair_dados as extrair_dados 
+
 def main(doc_texto):
     termos_chave = [
         {"nome": "nome_pessoa", "pesquisar": "NOME DO PROPRIETÁRIO"},
