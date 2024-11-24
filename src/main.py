@@ -6,12 +6,14 @@ from typing import List, Annotated
 import src.models as models
 from src.database import engine, SessionLocal
 from sqlalchemy.orm import Session
-from src.functions import leitor_final
-from src.schemas import UserBase, UserPublic, UserUpdate, PdfContentBase, TrafficViolationBase, Token, UserLogin, MessageResponse, TokenData 
+from src.functions import leitor_final, colors
+from src.schemas import UserBase, UserPublic, UserUpdate, PdfContentBase, TrafficViolationBase, Token, UserLogin, MessageResponse, TokenData, GraphicData, Color, Dataset, ChartResponse, GraphLine, GraphBar, GraphPie 
 from src.security import get_password_hash, verify_password, create_token, get_current_user, validate_refresh_token
 from src.utils import convert_user_to_public, is_update_from_commom_user_valid
 from datetime import timedelta
 from src.settings import Settings
+import pandas as pd
+
 
 settings = Settings()
 
@@ -111,12 +113,133 @@ async def get_user(db: db_dependency, user_id: int | None = None, username: str 
     else:
         return convert_user_to_public(user)
 
+
+@app.get("/graph", status_code=status.HTTP_200_OK, response_model=ChartResponse)
+async def create_data(
+    db: db_dependency, 
+    id_user: int | None = None, 
+    username: str | None = None
+):
+    fines = await get_fines(db, id_user, username)
+
+    if not fines:
+        raise HTTPException(status_code=404, detail="Nenhuma multa encontrada.")
+
+    background_colors = []
+    hover_background_colors = []
+
+    data_infracao_data = []
+    natureza_data = []
+    marca_veiculo_data = []
+    velocidade_regulamentada_data = []
+    enquadramento_data = []
+    endereco_data = []
+
+    anos = ["2021","2022", "2023", "2024"]
+
+    color1 = colors.get_random_rgb()
+        
+    
+    for fine in fines:
+        data_infracao_data.append(fine.data_infracao)
+        natureza_data.append(fine.natureza)
+        marca_veiculo_data.append(fine.marca_veiculo)
+        velocidade_regulamentada_data.append(fine.velocidade_regulamentada)
+        enquadramento_data.append(fine.enquadramento)
+        endereco_data.append(fine.endereco_infracao)
+
+        color = colors.get_random_rgb()
+        while not colors.is_color_different_from_others(background_colors, color):
+         color = colors.get_random_rgb()
+        background_colors.append(color)
+        hover_background_colors.append(colors.lighten_color(color))
+
+    #Grafico de Linhas
+    data_infracao = [
+        GraphLine(
+            label = anos,
+            fill = True,
+            backgroundColor = colors.convert_to_rgba(color1, 0.3),
+            lineTension = 0.3,
+            borderColor = colors.lighten_color(color),
+            borderCapStyle = 'butt',
+            borderDash = [],
+            borderDashOffset =  0.0,
+            borderJoinStyle =  'miter',
+            pointBorderColor = '205, 130,1 58',
+            pointBackgroundColor = '255, 255, 255',
+            pointBorderWidth = 10,
+            pointHoverRadius = 5,
+            pointHoverBackgroundColor = '0, 0, 0',
+            pointHoverBorderColor =  '220, 220, 220,1',
+            pointHoverBorderWidth =  2,
+            pointRadius =  1,
+            pointHitRadius = 10,
+            data = data_infracao_data,
+
+        )
+    ]
+
+    #Grafico de Barra
+    enquadramento =[
+        GraphBar(
+            label="A",
+            data = enquadramento_data,
+            backgroundColor=colors.convert_list_to_rgba(background_colors, 0.4),
+            borderWidth=2,
+            borderColor=colors.convert_list_to_rgba(background_colors, 1.0)
+        )
+    ]
+
+    marca_veiculo = [
+        GraphBar(
+            label="B",
+            data = marca_veiculo_data,
+            backgroundColor=colors.convert_list_to_rgba(background_colors, 0.4),
+            borderWidth=2,
+            borderColor=colors.convert_list_to_rgba(background_colors, 1.0)
+        )
+    ]
+
+    #Grafico Pie ou Doughnut
+    natureza = [
+        GraphPie(
+            label = "C",
+            data=natureza_data,
+            backgroundColor=background_colors,
+            hover_backgroundColor=hover_background_colors
+        )
+    ]
+
+    velocidade_regulamentada= [
+        GraphPie(
+            label = "D",
+            data=velocidade_regulamentada_data,
+            backgroundColor=background_colors,
+            hover_backgroundColor=hover_background_colors
+        )
+    ]
+
+    return ChartResponse(data_infracao=data_infracao, enquadramento=enquadramento, modelo_veiculo=marca_veiculo, natureza=natureza, velocidade_regulamentada=velocidade_regulamentada)
+
 @app.get("/users/me", response_model=UserPublic, status_code=status.HTTP_200_OK)
 def read_users_me(
         db: db_dependency,
         current_user: models.User = Depends(get_current_user)
     ):
     return convert_user_to_public(current_user)
+
+@app.get("/colors", response_model=Color, status_code=status.HTTP_200_OK)
+def get_color(db: db_dependency):
+    background_colors = []
+    hover_background_colors = []
+
+    color = colors.get_random_rgb()
+    background_colors.append(color)
+    hover_background_colors(colors.lighten_color(color))
+    colors = (background_colors, hover_background_colors)
+
+    return colors
 
 @app.patch('/users/{user_id}', response_model=UserPublic, status_code=status.HTTP_200_OK) 
 def update_user(
@@ -210,3 +333,5 @@ def refresh_access_token(
     new_access_token = create_token(data={'sub': user.email, 'role': user.role.value}, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
 
     return {'access_token': new_access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
+
+

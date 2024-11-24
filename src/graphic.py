@@ -1,5 +1,8 @@
 import pandas as pd
 import plotly.express as px
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 from src.database import SessionLocal
@@ -14,7 +17,7 @@ settings = Settings()
 # Função para buscar todas as multas
 def fetch_all_multas():
     with SessionLocal() as session:
-        result = session.execute(text('SELECT nome_pessoa, pontuacao FROM pdf'))  # Ajuste para a sua tabela e campos
+        result = session.execute(text('SELECT * FROM pdf'))  # Ajuste para a sua tabela e campos
         data = result.fetchall()
         
         # Convertendo os dados para um DataFrame do Pandas

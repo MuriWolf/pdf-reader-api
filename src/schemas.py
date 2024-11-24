@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict
+from typing import Optional
 import src.models as models
 
 class MessageResponse(BaseModel):
@@ -17,6 +18,76 @@ class TokenData(BaseModel):
 class UserLogin(BaseModel):
     email: str
     senha: str
+
+class GraphicData(BaseModel):
+    id: int
+    marca_veiculo: Optional[str] = None  
+    infracao: Optional[str] = None       
+    natureza: Optional[str] = None        
+    data_infracao: Optional[str] = None 
+    endereco_infracao: Optional[str] = None 
+    velocidade_regulamentada: Optional[str] = None  
+    enquadramento: Optional[str] = None 
+    background_color: Optional[str] = None
+    hover_background_color: str = None
+
+    class Config:
+        exclude_none = True
+
+class Dataset(BaseModel):
+    label: str
+    data: list[str]
+    backgroundColor: list[str]
+    hover_backgroundColor: list[str]
+
+class GraphPie(BaseModel):
+    label: str
+    data: list[str]
+    backgroundColor: list[str]
+    hover_backgroundColor: list[str]
+
+class GraphBar(BaseModel):
+    label: str
+    data: list[str]
+    backgroundColor: list[str]
+    borderWidth: int
+    borderColor: list[str]
+
+class GraphLine(BaseModel):
+    label: list[str]
+    fill: bool
+    backgroundColor: str
+    lineTension: float
+    borderColor: str
+    borderCapStyle: str
+    borderDash: list
+    borderDashOffset: float
+    borderJoinStyle: str
+    pointBorderColor: str
+    pointBackgroundColor: str
+    pointBorderWidth: int
+    pointHoverRadius: int
+    pointHoverBackgroundColor: str
+    pointHoverBorderColor: str
+    pointHoverBorderWidth: int
+    pointRadius: int
+    pointHitRadius: int
+    data: list[str]
+
+class ChartResponse(BaseModel):
+    data_infracao: list[GraphLine] = None
+    natureza: list[GraphPie] = None
+    modelo_veiculo: list[GraphBar] = None
+    velocidade_regulamentada: list[GraphPie] = None
+    enquadramento: list[GraphBar] =  None
+    endereco: list[Dataset] = None
+
+
+
+class Color(BaseModel):
+    background_color: str | None
+    hover_background_color: str
+
 
 class UserBase(BaseModel):
     email: str

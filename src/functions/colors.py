@@ -8,12 +8,43 @@ def get_random_num() -> int:
 def get_random_rgb() -> str:
     return f"rgb({get_random_num()}, {get_random_num()}, {get_random_num()})"
 
+def convert_to_rgba(rgb_code: str, opacity: float) -> str:
+    # Extraindo os valores RGB do código gerado
+    rgb_values = rgb_code[rgb_code.find("(")+1:rgb_code.find(")")]
+    return f"rgba({rgb_values}, {opacity})"
+
+def convert_list_to_rgba(rgb_list: list[str], opacity: float) -> list[str]:
+    """
+    Converte uma lista de cores RGB para RGBA com a opacidade especificada.
+    
+    Args:
+        rgb_list (list[str]): Lista de strings no formato "rgb(R, G, B)".
+        opacity (float): Valor da opacidade (0 a 1).
+    
+    Returns:
+        list[str]: Lista de cores no formato "rgba(R, G, B, A)".
+    """
+    rgba_list = []
+    for rgb_code in rgb_list:
+        # Extraindo os valores RGB do código gerado
+        rgb_values = rgb_code[rgb_code.find("(")+1:rgb_code.find(")")]
+        rgba_list.append(f"rgba({rgb_values}, {opacity})")
+    return rgba_list
+
+
 def convert_rgb_to_list(rgb: str) -> list:
     match = re.match(r"rgb\((\d+),\s*(\d+),\s*(\d+)\)", rgb)
     if match:
         r, g, b = map(int, match.groups())
     
     return [r, g, b]
+
+def convert_rgba_to_list(rgba: str) -> list:
+    match = re.match(r"rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)", rgba)
+    if match:
+        r, g, b, a = map(int, match.groups())
+    
+    return [r, g, b, a]
 
 def diff_color(first_color: list[int], second_color: list[int]) -> int:
     sum_diff: int = 0
@@ -45,6 +76,11 @@ def lighten_color(color: str) -> str:
 
 background_color = []
 hover_background_color = []
+
+
+#Logica para criar as paletas de cores para cada grafico
+#Por exemplo: no grafico de natureza teria que ser range(0, 3 -> os três diferentes tipos de natureza de multa)
+
 
 for i in range(0, 10): 
     color = get_random_rgb()
