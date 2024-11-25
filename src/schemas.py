@@ -39,12 +39,15 @@ class Dataset(BaseModel):
     data: list[str]
     backgroundColor: list[str]
     hover_backgroundColor: list[str]
+        
+class GraphPieDataset(BaseModel):
+    data: list[str] 
+    backgroundColor: list[str]
+    hover_backgroundColor: list[str] 
 
 class GraphPie(BaseModel):
     label: str
-    data: list[str]
-    backgroundColor: list[str]
-    hover_backgroundColor: list[str]
+    datasets: list[GraphPieDataset] 
 
 class GraphBar(BaseModel):
     label: str
@@ -75,14 +78,12 @@ class GraphLine(BaseModel):
     data: list[str]
 
 class ChartResponse(BaseModel):
-    data_infracao: list[GraphLine] = None
-    natureza: list[GraphPie] = None
-    modelo_veiculo: list[GraphBar] = None
-    velocidade_regulamentada: list[GraphPie] = None
-    enquadramento: list[GraphBar] =  None
-    endereco: list[Dataset] = None
-
-
+    data_infracao: GraphLine = None
+    natureza: GraphPie = None
+    modelo_veiculo: GraphBar = None
+    velocidade_regulamentada: GraphPie = None
+    enquadramento: GraphBar =  None
+    endereco: Dataset = None
 
 class Color(BaseModel):
     background_color: str | None

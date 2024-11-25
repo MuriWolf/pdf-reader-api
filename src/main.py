@@ -7,7 +7,7 @@ import src.models as models
 from src.database import engine, SessionLocal
 from sqlalchemy.orm import Session
 from src.functions import leitor_final, colors
-from src.schemas import UserBase, UserPublic, UserUpdate, PdfContentBase, TrafficViolationBase, Token, UserLogin, MessageResponse, TokenData, GraphicData, Color, Dataset, ChartResponse, GraphLine, GraphBar, GraphPie 
+from src.schemas import UserBase, UserPublic, UserUpdate, PdfContentBase, TrafficViolationBase, Token, UserLogin, MessageResponse, TokenData, GraphicData, Color, Dataset, ChartResponse, GraphLine, GraphBar, GraphPie, GraphPieDataset
 from src.security import get_password_hash, verify_password, create_token, get_current_user, validate_refresh_token
 from src.utils import convert_user_to_public, is_update_from_commom_user_valid
 from datetime import timedelta
@@ -138,7 +138,6 @@ async def create_data(
 
     color1 = colors.get_random_rgb()
         
-    
     for fine in fines:
         data_infracao_data.append(fine.data_infracao)
         natureza_data.append(fine.natureza)
@@ -154,8 +153,7 @@ async def create_data(
         hover_background_colors.append(colors.lighten_color(color))
 
     #Grafico de Linhas
-    data_infracao = [
-        GraphLine(
+    data_infracao = GraphLine(
             label = anos,
             fill = True,
             backgroundColor = colors.convert_to_rgba(color1, 0.3),
@@ -175,49 +173,47 @@ async def create_data(
             pointRadius =  1,
             pointHitRadius = 10,
             data = data_infracao_data,
-
         )
-    ]
 
     #Grafico de Barra
-    enquadramento =[
-        GraphBar(
+    enquadramento = GraphBar(
             label="A",
             data = enquadramento_data,
             backgroundColor=colors.convert_list_to_rgba(background_colors, 0.4),
             borderWidth=2,
             borderColor=colors.convert_list_to_rgba(background_colors, 1.0)
         )
-    ]
 
-    marca_veiculo = [
-        GraphBar(
+    marca_veiculo = GraphBar(
             label="B",
             data = marca_veiculo_data,
             backgroundColor=colors.convert_list_to_rgba(background_colors, 0.4),
             borderWidth=2,
             borderColor=colors.convert_list_to_rgba(background_colors, 1.0)
         )
-    ]
 
     #Grafico Pie ou Doughnut
-    natureza = [
-        GraphPie(
-            label = "C",
-            data=natureza_data,
-            backgroundColor=background_colors,
-            hover_backgroundColor=hover_background_colors
-        )
-    ]
-
-    velocidade_regulamentada= [
-        GraphPie(
-            label = "D",
-            data=velocidade_regulamentada_data,
-            backgroundColor=background_colors,
-            hover_backgroundColor=hover_background_colors
-        )
-    ]
+    natureza = GraphPie(
+        label = "C",
+        datasets=[
+            GraphPieDataset(
+                data=natureza_data,
+                backgroundColor=background_colors,
+                hover_backgroundColor=hover_background_colors
+            )
+        ]
+    )
+    
+    velocidade_regulamentada= GraphPie(
+        label = "D",
+        datasets=[
+            GraphPieDataset(
+                data=velocidade_regulamentada_data,
+                backgroundColor=background_colors,
+                hover_backgroundColor=hover_background_colors
+            )
+        ]
+    )
 
     return ChartResponse(data_infracao=data_infracao, enquadramento=enquadramento, modelo_veiculo=marca_veiculo, natureza=natureza, velocidade_regulamentada=velocidade_regulamentada)
 
