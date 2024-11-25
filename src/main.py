@@ -12,7 +12,6 @@ from src.security import get_password_hash, verify_password, create_token, get_c
 from src.utils import convert_user_to_public, is_update_from_commom_user_valid
 from datetime import timedelta
 from src.settings import Settings
-import pandas as pd
 
 
 settings = Settings()
