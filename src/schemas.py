@@ -41,23 +41,19 @@ class Dataset(BaseModel):
     hover_backgroundColor: list[str]
         
 class GraphPieDataset(BaseModel):
-    data: list[str] 
+    data: list[int] 
     backgroundColor: list[str]
     hover_backgroundColor: list[str] 
 
-class GraphPie(BaseModel):
+class GraphBarDataset(BaseModel):
     label: str
-    datasets: list[GraphPieDataset] 
-
-class GraphBar(BaseModel):
-    label: str
-    data: list[str]
+    data: list[int]
     backgroundColor: list[str]
     borderWidth: int
     borderColor: list[str]
 
-class GraphLine(BaseModel):
-    label: list[str]
+class GraphLineDataset(BaseModel):
+    labels: str
     fill: bool
     backgroundColor: str
     lineTension: float
@@ -75,7 +71,19 @@ class GraphLine(BaseModel):
     pointHoverBorderWidth: int
     pointRadius: int
     pointHitRadius: int
-    data: list[str]
+    data: list[int]
+
+class GraphPie(BaseModel):
+    label: str
+    datasets: list[GraphPieDataset] 
+
+class GraphBar(BaseModel):
+    label: str
+    datasets: list[GraphBarDataset]
+
+class GraphLine(BaseModel):
+    labels: str
+    datasets: list[GraphLineDataset]
 
 class ChartResponse(BaseModel):
     data_infracao: GraphLine = None
