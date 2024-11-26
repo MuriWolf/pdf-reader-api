@@ -2,8 +2,14 @@ from datetime import datetime
 from collections import defaultdict
 import pandas as pd
 import chardet
+import os.path
+from pathlib import Path
 
-with open("C:/Users/Usuario/Desktop/pdf-reader-api/src/functions/consultaInfracao.csv", "rb") as f:
+file = "consultaInfracao.csv"
+path = f"{Path(__file__).parent}/{file}"
+norm_path = os.path.normpath(path=path)
+
+with open(norm_path, "rb") as f:
     result = chardet.detect(f.read())
     print(result)
 
@@ -63,7 +69,7 @@ enquadramento_lista = ['74550', '54871', '74550', '12345', '74710']
 
 
 def contador_enquadramento(enquadramento_list: list):
-    df = pd.read_csv(r"C:/Users/Usuario/Desktop/pdf-reader-api/src/functions/consultaInfracao.csv", sep=';', encoding='latin1')
+    df = pd.read_csv(norm_path, sep=';', encoding='latin1')
     df.columns = df.columns.str.strip()  # Remove espaços extras
     df.columns = df.columns.str.normalize("NFKD").str.encode("ascii", errors="ignore").str.decode("utf-8")
     #print(df.columns)
