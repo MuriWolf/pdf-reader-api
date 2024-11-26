@@ -222,9 +222,9 @@ async def create_data(
         datasets=[
             GraphPieDataset(
                 label = "Grafico de Natureza da Infração",
-                data=natureza,
-                backgroundColor=background_colors,
-                hover_backgroundColor=hover_background_colors
+                data=natureza.values(),
+                backgroundColor=contador.cores_natureza(natureza_list)[0],
+                hover_backgroundColor=contador.cores_natureza(natureza_list)[1]
             )
         ]
     )
@@ -250,17 +250,6 @@ def read_users_me(
     ):
     return convert_user_to_public(current_user)
 
-@app.get("/colors", response_model=Color, status_code=status.HTTP_200_OK)
-def get_color(db: db_dependency):
-    background_colors = []
-    hover_background_colors = []
-
-    color = colors.get_random_rgb()
-    background_colors.append(color)
-    hover_background_colors(colors.lighten_color(color))
-    colors = (background_colors, hover_background_colors)
-
-    return colors
 
 @app.patch('/users/{user_id}', response_model=UserPublic, status_code=status.HTTP_200_OK) 
 def update_user(

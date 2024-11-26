@@ -3,6 +3,7 @@ from collections import defaultdict
 import pandas as pd
 import chardet
 import os.path
+import src.functions.colors as colors
 from pathlib import Path
 
 file = "consultaInfracao.csv"
@@ -15,21 +16,45 @@ with open(norm_path, "rb") as f:
 
 
 def contador_natureza(natureza_data: list[str]):
-    leve = 0
-    grave = 0
-    gravissima = 0
-    natureza_dados = []
+    natureza_dados = {
+        "Leve": 0,
+        "Media": 0,
+        "Grave": 0,
+        "Gravíssima": 0
+    }
+
+
     for natureza in natureza_data:
-        if(natureza == "Leve"):
-            leve += 1
-            natureza_dados.append(leve)
-        if(natureza == "Grave"):
-            grave += 1
-            natureza_dados.append(grave)
-        if(natureza == "Gravíssima"):
-            gravissima += 1
-            natureza_dados.append(gravissima)
+        if natureza in natureza_dados:
+            natureza_dados[natureza] += 1
+
     return natureza_dados
+
+def cores_natureza(natureza: list) -> list[str]:
+    classificações = ["Leve", "Media", "Grave", "Gravíssima"]
+    classificacao_cores = {}
+
+    backgroundcolors = []
+    hovercolors = []
+
+    natureza_tipos = contador_natureza(natureza)
+
+    for classificacao in classificações:
+        if natureza_tipos[classificacao] > 0:
+            while True:
+                color = colors.get_random_rgb()
+
+                if color not in classificacao_cores.values():
+                    classificacao_cores[classificacao] = color
+                    break
+    
+    for classificacao, color in classificacao_cores.items():
+        backgroundcolors.append(color)
+        hovercolors.append(colors.lighten_color(color))
+
+    
+    return [backgroundcolors, hovercolors]
+
 
 def contador_data(data_infracao_dados: list[str]):
 
