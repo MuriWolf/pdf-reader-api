@@ -135,6 +135,8 @@ async def create_data(
     enquadramento_data = []
     endereco_data = []
 
+    enquadramento_dict = contador.contador_enquadramento(enquadramento_data)
+
     anos = ["2021","2022", "2023", "2024"]
 
     color1 = colors.get_random_rgb()
@@ -165,7 +167,7 @@ async def create_data(
             labels = "2022, 2023, 2024",
             datasets = [
                 GraphLineDataset(
-                    labels = "Anos",
+                    label = "Grafico de Data da Infração (Por Ano)",
                     fill = True,
                     backgroundColor = colors.convert_to_rgba(color1, 0.3),
                     lineTension = 0.3,
@@ -189,11 +191,11 @@ async def create_data(
 
     #Grafico de Barra
     enquadramento = GraphBar(
-            label = "A",
+            labels = list(enquadramento_dict.keys()),
             datasets=[
                 GraphBarDataset(
-                    label="A",
-                    data = enquadramento_data,
+                    label="Grafico de Enquadramentos",
+                    data = enquadramento_dict.values(),
                     backgroundColor=colors.convert_list_to_rgba(background_colors, 0.4),
                     borderWidth=2,
                     borderColor=colors.convert_list_to_rgba(background_colors, 1.0)
@@ -216,9 +218,10 @@ async def create_data(
 
     #Grafico Pie ou Doughnut
     natureza = GraphPie(
-        label = "Leve, Grave, Gravíssima",
+        labels = ["Leve", "Grave", "Gravíssima"],
         datasets=[
             GraphPieDataset(
+                label = "Grafico de Natureza da Infração",
                 data=natureza,
                 backgroundColor=background_colors,
                 hover_backgroundColor=hover_background_colors
@@ -227,9 +230,10 @@ async def create_data(
     )
     
     velocidade_regulamentada= GraphPie(
-        label = "50Km , 60Km, 70Km, 80Km, 90Km, 100Km",
+        labels = ["50Km" , "60Km", "70Km", "80Km", "90Km", "100Km"],
         datasets=[
             GraphPieDataset(
+               label = "Grafico de Velocidade Regulamentada",
                data=velocidade,
                backgroundColor=background_colors,
                hover_backgroundColor=hover_background_colors

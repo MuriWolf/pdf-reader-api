@@ -41,6 +41,7 @@ class Dataset(BaseModel):
     hover_backgroundColor: list[str]
         
 class GraphPieDataset(BaseModel):
+    label: str
     data: list[int] 
     backgroundColor: list[str]
     hover_backgroundColor: list[str] 
@@ -53,7 +54,7 @@ class GraphBarDataset(BaseModel):
     borderColor: list[str]
 
 class GraphLineDataset(BaseModel):
-    labels: str
+    label: str
     fill: bool
     backgroundColor: str
     lineTension: float
@@ -74,11 +75,11 @@ class GraphLineDataset(BaseModel):
     data: list[int]
 
 class GraphPie(BaseModel):
-    label: str
+    labels: list[str]
     datasets: list[GraphPieDataset] 
 
 class GraphBar(BaseModel):
-    label: str
+    labels: list[str]
     datasets: list[GraphBarDataset]
 
 class GraphLine(BaseModel):

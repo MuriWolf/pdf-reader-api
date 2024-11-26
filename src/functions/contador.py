@@ -1,5 +1,12 @@
 from datetime import datetime
 from collections import defaultdict
+import pandas as pd
+import chardet
+
+with open("C:/Users/Usuario/Desktop/pdf-reader-api/src/functions/consultaInfracao.csv", "rb") as f:
+    result = chardet.detect(f.read())
+    print(result)
+
 
 def contador_natureza(natureza_data: list[str]):
     leve = 0
@@ -51,4 +58,37 @@ datas_ano = []
 for data in datas:
     data_limpa = data.strip()
     datas_ano.append(datetime.strptime(data, "%d/%m/%Y"))
-    print(datas_ano)
+
+enquadramento_lista = ['74550', '54871', '74550', '12345', '74710']
+
+
+def contador_enquadramento(enquadramento_list: list):
+    df = pd.read_csv(r"C:/Users/Usuario/Desktop/pdf-reader-api/src/functions/consultaInfracao.csv", sep=';', encoding='latin1')
+    df.columns = df.columns.str.strip()  # Remove espaços extras
+    df.columns = df.columns.str.normalize("NFKD").str.encode("ascii", errors="ignore").str.decode("utf-8")
+    #print(df.columns)
+
+    # Normalizar os valores do CSV
+    df['Codigo de infracao'] = df['Codigo de infracao'].astype(str).str.strip()
+    df['Infracao'] = df['Infracao'].astype(str).str.strip()
+
+    # Criar o dicionário de códigos para descrições
+    codigos = dict(zip(df['Codigo de infracao'], df['Infracao']))
+
+    # Normalizar a lista de entrada
+    enquadramento_list = [str(codigo).strip() for codigo in enquadramento_list]
+
+    contador = {}
+    resultado = {}
+
+    for codigo in enquadramento_lista:
+        
+        contador[codigo] = contador.get(codigo, 0) + 1
+    
+    for codigo, ocorrencia in contador.items():
+        descricao = codigos.get(codigo, "Descrição Não Encontrada")
+        resultado[descricao] = ocorrencia
+    
+    return resultado
+
+print(contador_enquadramento(enquadramento_list=enquadramento_lista))
