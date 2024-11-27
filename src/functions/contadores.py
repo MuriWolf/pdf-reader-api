@@ -166,12 +166,10 @@ def contar_enquadramento(enquadramentos_data: list):
     } 
 
 def contar_velocidade(velocidade_dados: list):
-    
     ocorrencias = defaultdict(int)
     backgroundcolor = []
     hovercolor = []
     color_dict = {}
-
 
     for velocidade in velocidade_dados:
         ocorrencias[velocidade] += 1
@@ -186,14 +184,8 @@ def contar_velocidade(velocidade_dados: list):
         hovercolor.append(colors.lighten_color(color))
     
     return {
-        "label": ocorrencias.keys(),
+        "label": [ocorrencia+"km" for ocorrencia in ocorrencias.keys()],
         "Data": ocorrencias.values(),
         "backgroundcolor": backgroundcolor,
         "hovercolor": hovercolor
     }
-
-    
-
-velocidade = ["60 Km", "70 Km", "70 Km", "50 Km"]
-
-print(contar_velocidade(velocidade))
