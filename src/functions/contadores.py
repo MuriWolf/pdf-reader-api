@@ -16,23 +16,21 @@ with open(norm_path, "rb") as f:
     print(result)
 
 
-def contar_natureza(natureza_data: list[str]):
-    natureza_dados = {
-        "Leve": 0,
-        "Media": 0,
-        "Grave": 0,
-        "Gravíssima": 0
+def contar_natureza(naturezas_data: list[str]):
+    contagem_naturezas = {
+        "LEVE": 0,
+        "MEDIA": 0,
+        "GRAVE": 0,
+        "GRAVÍSSIMA": 0
     }
 
+    for data in naturezas_data:
+        if data.upper() in constants.CLASSIFICACOES_NATUREZAS_MULTA:
+            contagem_naturezas[data.upper()] += 1
 
-    for natureza in natureza_data:
-        if natureza in natureza_dados:
-            natureza_dados[natureza] += 1
-
-    return natureza_dados
+    return contagem_naturezas 
 
 def criar_cor_natureza(natureza: list) -> list[str]:
-    classificações = ["Leve", "Media", "Grave", "Gravíssima"]
     classificacao_cores = {}
 
     backgroundcolors = []
@@ -40,7 +38,7 @@ def criar_cor_natureza(natureza: list) -> list[str]:
 
     natureza_tipos = contar_natureza(natureza)
 
-    for classificacao in classificações:
+    for classificacao in constants.CLASSIFICACOES_NATUREZAS_MULTA:
         if natureza_tipos[classificacao] >= 0:
             while True:
                 color = colors.get_random_rgb()
@@ -52,7 +50,6 @@ def criar_cor_natureza(natureza: list) -> list[str]:
     for classificacao, color in classificacao_cores.items():
         backgroundcolors.append(color)
         hovercolors.append(colors.lighten_color(color))
-
     
     return {
         "BackgroundColor": backgroundcolors,

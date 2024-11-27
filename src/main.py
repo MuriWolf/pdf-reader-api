@@ -223,7 +223,7 @@ async def create_data(
 
     #Grafico Pie ou Doughnut
     natureza_graph = GraphPie(
-        labels = ["Leve", "Grave", "Gravíssima"],
+        labels = ["Leve", "Media", "Grave", "Gravíssima"],
         datasets=[
             GraphPieDataset(
                 label = "Grafico de Natureza da Infração",
