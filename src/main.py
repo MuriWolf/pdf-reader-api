@@ -6,7 +6,7 @@ from typing import List, Annotated
 import src.models as models
 from src.database import engine, SessionLocal
 from sqlalchemy.orm import Session
-from src.functions import contador, leitor_final, colors
+from src.functions import contadores, leitor_final, colors
 from src.schemas import UserBase, UserPublic, UserUpdate, PdfContentBase, TrafficViolationBase, Token, UserLogin, MessageResponse, TokenData, GraphicData, Color, Dataset, ChartResponse, GraphLine, GraphBar, GraphPie, GraphPieDataset, GraphLineDataset, GraphBarDataset
 from src.security import get_password_hash, verify_password, create_token, get_current_user, validate_refresh_token
 from src.utils import convert_user_to_public, is_update_from_commom_user_valid
@@ -132,13 +132,12 @@ async def create_data(
 
     data_infracao_data = []
     natureza_data = []
-    natureza_list = []
     marca_veiculo_data = []
     velocidade_regulamentada_data = []
     enquadramento_data = []
     endereco_data = []
 
-    enquadramento_dict = contador.contador_enquadramento(enquadramento_data)
+    
 
     anos = ["2021","2022", "2023", "2024"]
 
@@ -148,16 +147,18 @@ async def create_data(
     
     for fine in fines:
         data_infracao_data.append(fine.data_infracao)
-        natureza_list.append(fine.natureza)
+        natureza_data.append(fine.natureza)
         marca_veiculo_data.append(fine.marca_veiculo)
         velocidade_regulamentada_data.append(fine.velocidade_regulamentada)
         enquadramento_data.append(fine.enquadramento)
         endereco_data.append(fine.endereco_infracao)
 
-        #Funções para convert listas de str para int***
-        natureza = contador.contador_natureza(natureza_list)
-        velocidade = contador.str_to_int(velocidade_regulamentada_data)
-        data = contador.contador_data(data_infracao_data)
+        #Funções para contagem de ocorrencias de determinados dados com suas respecitvos rotulos(labels)
+        natureza_dict = contadores.contar_natureza(natureza_data)
+        velocidade_dict = contadores.str_to_int(velocidade_regulamentada_data)
+        data_dict = contadores.contar_data(data_infracao_data)
+        marca_dict = contadores.contar_marca(marca_veiculo_data)
+        enquadramento_dict = contadores.contar_enquadramento(enquadramento_data)
 
         color = colors.get_random_rgb()
         while not colors.is_color_different_from_others(background_colors, color):
@@ -166,8 +167,8 @@ async def create_data(
         hover_background_colors.append(colors.lighten_color(color))
 
     #Grafico de Linhas
-    data_infracao = GraphLine(
-            labels = "2022, 2023, 2024",
+    data_infracao_graph = GraphLine(
+            labels = anos,
             datasets = [
                 GraphLineDataset(
                     label = "Grafico de Data da Infração (Por Ano)",
@@ -188,67 +189,66 @@ async def create_data(
                     pointHoverBorderWidth =  2,
                     pointRadius =  1,
                     pointHitRadius = 10,
-                    data = list(data.values())
+                    data = list(data_dict.values())
                 )]
         )
 
     #Grafico de Barra
-    enquadramento = GraphBar(
-            labels = list(enquadramento_dict.keys()),
+    enquadramento_graph = GraphBar(
+            labels = list(enquadramento_dict['codigo']),
             datasets=[
                 GraphBarDataset(
-                    label="Grafico de Enquadramentos",
-                    data = enquadramento_dict.values(),
-                    backgroundColor=colors.convert_list_to_rgba(background_colors, 0.4),
+                    label=enquadramento_dict['descricao'],
+                    data = enquadramento_dict['data'],
+                    backgroundColor=colors.convert_list_to_rgba(enquadramento_dict['backgroundcolor'], 0.4),
                     borderWidth=2,
-                    borderColor=colors.convert_list_to_rgba(background_colors, 1.0)
+                    borderColor=colors.convert_list_to_rgba(enquadramento_dict['hovercolor'], 1.0)
                 )
             ]
        )
-    
 
-    #marca_veiculo = GraphBar(
-    #        label="C",
-    #        datasets=[
-    #            GraphBarDataset(
-    #               label="B",
-    #               data = marca_veiculo_data,
-    #               backgroundColor=colors.convert_list_to_rgba(background_colors, 0.4),
-    #               borderWidth=2,
-    #               borderColor=colors.convert_list_to_rgba(background_colors, 1.0)
-    #            )
-    #        ]
-    #    )
+    marca_graph = GraphBar(
+        labels = marca_dict["label"],
+        datasets=[
+            GraphBarDataset(
+                label="Multas registradas por Marca",
+                data=marca_dict['data'],
+                backgroundColor = colors.convert_list_to_rgba(marca_dict['BackgroundColor'], 0.4),
+                borderWidth= 2,
+                borderColor=colors.convert_list_to_rgba(marca_dict['HoverColor'], 1.0)
+
+            )
+        ]
+    )
 
     #Grafico Pie ou Doughnut
-    natureza = GraphPie(
-        labels = ["Leve", "Média", "Grave", "Gravíssima"],
+    natureza_graph = GraphPie(
+        labels = ["Leve", "Grave", "Gravíssima"],
         datasets=[
             GraphPieDataset(
                 label = "Grafico de Natureza da Infração",
-                data=natureza.values(),
-                backgroundColor=contador.cores_natureza(natureza_list)[0],
-                hover_backgroundColor=contador.cores_natureza(natureza_list)[1]
+                data=natureza_dict.values(),
+                backgroundColor=contadores.criar_cor_natureza(natureza_data)["BackgroundColor"],
+                hover_backgroundColor=contadores.criar_cor_natureza(natureza_data)["HoverColor"]
             )
         ]
     )
     
-    # logger.debug(natureza_list)
-    # logger.debug(contador.cores_natureza(natureza_list))
-
-    velocidade_regulamentada= GraphPie(
+    #logger.debug(natureza_list)
+    #logger.debug(contador.cores_natureza())
+    velocidade_regulamentada_graph= GraphPie(
         labels = ["50Km" , "60Km", "70Km", "80Km", "90Km", "100Km"],
         datasets=[
             GraphPieDataset(
                label = "Grafico de Velocidade Regulamentada",
-               data=velocidade,
+               data=velocidade_dict,
                backgroundColor=background_colors,
                hover_backgroundColor=hover_background_colors
             )
         ]
     )
 
-    return ChartResponse(data_infracao=data_infracao,  natureza=natureza, velocidade_regulamentada= velocidade_regulamentada,  enquadramento=enquadramento)
+    return ChartResponse(data_infracao=data_infracao_graph,  natureza=natureza_graph, velocidade_regulamentada= velocidade_regulamentada_graph,  enquadramento=enquadramento_graph, marca_veiculo=marca_graph)
 
 @app.get("/users/me", response_model=UserPublic, status_code=status.HTTP_200_OK)
 def read_users_me(

@@ -47,7 +47,7 @@ class GraphPieDataset(BaseModel):
     hover_backgroundColor: list[str] 
 
 class GraphBarDataset(BaseModel):
-    label: str
+    label: list[str]
     data: list[int]
     backgroundColor: list[str]
     borderWidth: int
@@ -89,7 +89,7 @@ class GraphLine(BaseModel):
 class ChartResponse(BaseModel):
     data_infracao: GraphLine = None
     natureza: GraphPie = None
-    modelo_veiculo: GraphBar = None
+    marca_veiculo: GraphBar = None
     velocidade_regulamentada: GraphPie = None
     enquadramento: GraphBar =  None
     endereco: Dataset = None
