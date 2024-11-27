@@ -163,11 +163,11 @@ def contar_enquadramento(enquadramento_list: list):
         resultado[descricao] = ocorrencia
     
     return{
-        "codigo": contador[codigo],
-        "descricao": resultado[descricao],
+        "codigo": codigos.keys(),
+        "descricao": resultado.keys(),
         "backgroundcolor": backgroundcolor,
         "hovercolor": hovercolor,
-        "data": resultado,
+        "data": resultado.values(),
     } 
 
 print(contar_enquadramento(enquadramento_list=enquadramento_lista))

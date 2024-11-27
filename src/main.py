@@ -195,11 +195,11 @@ async def create_data(
 
     #Grafico de Barra
     enquadramento_graph = GraphBar(
-            labels = list(enquadramento_dict['codigo']),
+            labels = list(str(enquadramento_dict['codigo'])),
             datasets=[
                 GraphBarDataset(
-                    label=enquadramento_dict['descricao'],
-                    data = enquadramento_dict['data'],
+                    label= "Enquadramento",
+                    data = list(enquadramento_dict['data']),
                     backgroundColor=colors.convert_list_to_rgba(enquadramento_dict['backgroundcolor'], 0.4),
                     borderWidth=2,
                     borderColor=colors.convert_list_to_rgba(enquadramento_dict['hovercolor'], 1.0)
