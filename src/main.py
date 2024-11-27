@@ -162,7 +162,7 @@ async def create_data(
 
     #Funções para contagem de ocorrencias de determinados dados com suas respecitvos rotulos(labels)
     natureza_dict = contadores.contar_natureza(natureza_data)
-    velocidade_dict = contadores.str_to_int(velocidade_regulamentada_data)
+    velocidade_dict = contadores.contar_velocidade(velocidade_regulamentada_data)
     data_dict = contadores.contar_data(data_infracao_data)
     marca_dict = contadores.contar_marca(marca_veiculo_data)
     enquadramento_dict = contadores.contar_enquadramento(enquadramento_data)
@@ -237,13 +237,13 @@ async def create_data(
     #logger.debug(natureza_list)
     #logger.debug(contador.cores_natureza())
     velocidade_regulamentada_graph= GraphPie(
-        labels = ["50Km" , "60Km", "70Km", "80Km", "90Km", "100Km"],
+        labels = velocidade_dict['label'],
         datasets=[
             GraphPieDataset(
                label = "Grafico de Velocidade Regulamentada",
-               data=velocidade_dict,
-               backgroundColor=background_colors,
-               hover_backgroundColor=hover_background_colors
+               data=velocidade_dict['Data'],
+               backgroundColor= velocidade_dict['backgroundcolor'],
+               hover_backgroundColor=velocidade_dict['hovercolor']
             )
         ]
     )
