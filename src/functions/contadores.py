@@ -83,8 +83,6 @@ def contar_marca(marca_veiculo_dados: list[str]):
 
 
 def contar_data(data_infracao_dados: list[str]):
-
-
     datas = [datetime.strptime(data.strip(), "%d/%m/%Y") for data in data_infracao_dados]
 
     ano = [data.year for data in datas]
@@ -105,10 +103,7 @@ def str_to_int(velocidade_regulamentada: list[str]):
         numero_string = item.replace(" km/h", "").replace(" ", "")
         if numero_string.isdigit():
             lista_inteiros.append(int(numero_string))
-            
-
-
-
+  
     return lista_inteiros
 
 datas = ["28/04/2022", "11/08/2023", "14/06/2024"]
@@ -117,10 +112,9 @@ for data in datas:
     data_limpa = data.strip()
     datas_ano.append(datetime.strptime(data, "%d/%m/%Y"))
 
-
 enquadramento_lista = ["74550", "55830", "74550"]
 
-def contar_enquadramento(enquadramento_list: list):
+def contar_enquadramento(enquadramentos_data: list):
     backgroundcolor = []
     hovercolor = []
     colors_dict = {}
@@ -128,7 +122,6 @@ def contar_enquadramento(enquadramento_list: list):
     df = pd.read_csv(norm_path, sep=';', encoding='latin1')
     df.columns = df.columns.str.strip()  # Remove espaços extras
     df.columns = df.columns.str.normalize("NFKD").str.encode("ascii", errors="ignore").str.decode("utf-8")
-    #print(df.columns)
 
     # Normalizar os valores do CSV
     df['Codigo de infracao'] = df['Codigo de infracao'].astype(str).str.strip()
@@ -137,13 +130,17 @@ def contar_enquadramento(enquadramento_list: list):
     # Criar o dicionário de códigos para descrições
     codigos = dict(zip(df['Codigo de infracao'], df['Infracao']))
 
+    print(codigos)
+
     # Normalizar a lista de entrada
-    enquadramento_list = [str(codigo).strip() for codigo in enquadramento_list]
+    enquadramentos_data = [str(codigo).strip() for codigo in enquadramentos_data]
+
+    print(enquadramentos_data)
 
     contador = {}
     resultado = {}
 
-    for codigo in enquadramento_list:
+    for codigo in enquadramentos_data:
         contador[codigo] = contador.get(codigo, 0) + 1
 
         if contador[codigo] >= 0:
@@ -157,14 +154,16 @@ def contar_enquadramento(enquadramento_list: list):
     
     for codigo, ocorrencia in contador.items():
         descricao = codigos.get(codigo, "Descrição Não Encontrada")
-        resultado[descricao] = ocorrencia
+        resultado[codigo] = ocorrencia
+
+    print(resultado)
     
     return{
-        "codigo": codigos.keys(),
+        "codigo": resultado.keys(),
         "descricao": resultado.keys(),
         "backgroundcolor": backgroundcolor,
         "hovercolor": hovercolor,
         "data": resultado.values(),
     } 
 
-print(contar_enquadramento(enquadramento_list=enquadramento_lista))
+print(contar_enquadramento(enquadramentos_data=enquadramento_lista))

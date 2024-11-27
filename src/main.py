@@ -153,18 +153,19 @@ async def create_data(
         enquadramento_data.append(fine.enquadramento)
         endereco_data.append(fine.endereco_infracao)
 
-        #Funções para contagem de ocorrencias de determinados dados com suas respecitvos rotulos(labels)
-        natureza_dict = contadores.contar_natureza(natureza_data)
-        velocidade_dict = contadores.str_to_int(velocidade_regulamentada_data)
-        data_dict = contadores.contar_data(data_infracao_data)
-        marca_dict = contadores.contar_marca(marca_veiculo_data)
-        enquadramento_dict = contadores.contar_enquadramento(enquadramento_data)
-
         color = colors.get_random_rgb()
         while not colors.is_color_different_from_others(background_colors, color):
             color = colors.get_random_rgb()
+
         background_colors.append(color)
         hover_background_colors.append(colors.lighten_color(color))
+
+    #Funções para contagem de ocorrencias de determinados dados com suas respecitvos rotulos(labels)
+    natureza_dict = contadores.contar_natureza(natureza_data)
+    velocidade_dict = contadores.str_to_int(velocidade_regulamentada_data)
+    data_dict = contadores.contar_data(data_infracao_data)
+    marca_dict = contadores.contar_marca(marca_veiculo_data)
+    enquadramento_dict = contadores.contar_enquadramento(enquadramento_data)
 
     #Grafico de Linhas
     data_infracao_graph = GraphLine(
@@ -195,7 +196,7 @@ async def create_data(
 
     #Grafico de Barra
     enquadramento_graph = GraphBar(
-            labels = list(str(enquadramento_dict['codigo'])),
+            labels = enquadramento_dict['codigo'],
             datasets=[
                 GraphBarDataset(
                     label= "Enquadramento",
@@ -216,7 +217,6 @@ async def create_data(
                 backgroundColor = colors.convert_list_to_rgba(marca_dict['BackgroundColor'], 0.4),
                 borderWidth= 2,
                 borderColor=colors.convert_list_to_rgba(marca_dict['HoverColor'], 1.0)
-
             )
         ]
     )
