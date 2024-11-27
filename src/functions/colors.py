@@ -53,12 +53,18 @@ def diff_color(first_color: list[int], second_color: list[int]) -> int:
     return sum_diff 
     
 def is_color_different_from_others(colors: list, new_color_str: str) -> bool:
+    difference_needed = 150
+    difference_needed -= 50 * math.floor(len(colors) / 10)
+
+    if difference_needed < 15:
+        difference_needed = 15 
+
     if len(colors) > 0:
         for color in colors:
             existing_color: list[int] = convert_rgb_to_list(color)
             new_color: list[int] = convert_rgb_to_list(new_color_str)
 
-            if diff_color(new_color, existing_color) <= 50:
+            if diff_color(new_color, existing_color) <= difference_needed:
                 return False
 
     return True 
