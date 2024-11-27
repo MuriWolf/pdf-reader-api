@@ -137,8 +137,6 @@ async def create_data(
     enquadramento_data = []
     endereco_data = []
 
-    
-
     anos = ["2021","2022", "2023", "2024"]
 
     color1 = colors.get_random_rgb()
@@ -169,7 +167,7 @@ async def create_data(
 
     #Grafico de Linhas
     data_infracao_graph = GraphLine(
-            labels = anos,
+            labels = data_dict['anos'],
             datasets = [
                 GraphLineDataset(
                     label = "Grafico de Data da Infração (Por Ano)",
@@ -190,7 +188,7 @@ async def create_data(
                     pointHoverBorderWidth =  2,
                     pointRadius =  1,
                     pointHitRadius = 10,
-                    data = list(data_dict.values())
+                    data = data_dict['data']
                 )]
         )
 

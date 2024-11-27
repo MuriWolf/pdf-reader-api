@@ -6,6 +6,7 @@ import os.path
 import src.functions.colors as colors
 from pathlib import Path
 import src.constants as constants
+from src.functions.utils import utils
 
 file = "consultaInfracao.csv"
 path = f"{Path(__file__).parent}/{file}"
@@ -85,17 +86,21 @@ def contar_marca(marca_veiculo_dados: list[str]):
 def contar_data(data_infracao_dados: list[str]):
     datas = [datetime.strptime(data.strip(), "%d/%m/%Y") for data in data_infracao_dados]
 
-    ano = [data.year for data in datas]
-    ano_min = min(ano)
-    ano_max = max(ano) 
+    anos = [data.year for data in datas]
+    ano_min = min(anos)
+    ano_max = max(anos) 
 
+    anos_intervalo = utils.create_int_interval(ano_min, ano_max)
+    anos_str_intervalo = [str(ano) for ano in anos_intervalo] 
+    
     contador = defaultdict(int)
     for data in datas:
-        if ano_min <= data.year <= ano_max:
-            contador[data.year] += 1
-    
-    return contador
+        contador[data.year] += 1
 
+    return {
+        "data": list(contador.values()),
+        "anos": anos_str_intervalo
+    }
 
 def str_to_int(velocidade_regulamentada: list[str]):
     lista_inteiros = []
@@ -130,12 +135,8 @@ def contar_enquadramento(enquadramentos_data: list):
     # Criar o dicionário de códigos para descrições
     codigos = dict(zip(df['Codigo de infracao'], df['Infracao']))
 
-    print(codigos)
-
     # Normalizar a lista de entrada
     enquadramentos_data = [str(codigo).strip() for codigo in enquadramentos_data]
-
-    print(enquadramentos_data)
 
     contador = {}
     resultado = {}
@@ -156,8 +157,6 @@ def contar_enquadramento(enquadramentos_data: list):
         descricao = codigos.get(codigo, "Descrição Não Encontrada")
         resultado[codigo] = ocorrencia
 
-    print(resultado)
-    
     return{
         "codigo": resultado.keys(),
         "descricao": resultado.keys(),
@@ -165,5 +164,3 @@ def contar_enquadramento(enquadramentos_data: list):
         "hovercolor": hovercolor,
         "data": resultado.values(),
     } 
-
-print(contar_enquadramento(enquadramentos_data=enquadramento_lista))
