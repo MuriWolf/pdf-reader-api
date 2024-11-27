@@ -5,6 +5,7 @@ import chardet
 import os.path
 import src.functions.colors as colors
 from pathlib import Path
+import src.constants as constants 
 
 file = "consultaInfracao.csv"
 path = f"{Path(__file__).parent}/{file}"
@@ -14,24 +15,21 @@ with open(norm_path, "rb") as f:
     result = chardet.detect(f.read())
     print(result)
 
-
-def contador_natureza(natureza_data: list[str]):
-    natureza_dados = {
-        "Leve": 0,
-        "Media": 0,
-        "Grave": 0,
-        "Gravíssima": 0
+def contador_natureza(datas_natureza: list[str]):
+    contagem_naturezas = {
+        "LEVE": 0,
+        "MEDIA": 0,
+        "GRAVE": 0,
+        "GRAVÍSSIMA": 0
     }
 
+    for data in datas_natureza:
+        if data.upper() in constants.CLASSIFICACOES_NATUREZAS_MULTA:
+            contagem_naturezas[data.upper()] += 1
 
-    for natureza in natureza_data:
-        if natureza in natureza_dados:
-            natureza_dados[natureza] += 1
-
-    return natureza_dados
+    return contagem_naturezas
 
 def cores_natureza(natureza: list) -> list[str]:
-    classificações = ["Leve", "Media", "Grave", "Gravíssima"]
     classificacao_cores = {}
 
     backgroundcolors = []
@@ -39,7 +37,10 @@ def cores_natureza(natureza: list) -> list[str]:
 
     natureza_tipos = contador_natureza(natureza)
 
-    for classificacao in classificações:
+    print(f"natureza : {natureza}")
+    print(f"natureza tipos: {natureza_tipos}")
+
+    for classificacao in constants.CLASSIFICACOES_NATUREZAS_MULTA:
         if natureza_tipos[classificacao] > 0:
             while True:
                 color = colors.get_random_rgb()
@@ -52,13 +53,10 @@ def cores_natureza(natureza: list) -> list[str]:
         backgroundcolors.append(color)
         hovercolors.append(colors.lighten_color(color))
 
-    
+    # TODO: retornar como dict {}
     return [backgroundcolors, hovercolors]
 
-
 def contador_data(data_infracao_dados: list[str]):
-
-
     datas = [datetime.strptime(data.strip(), "%d/%m/%Y") for data in data_infracao_dados]
 
     ano = [data.year for data in datas]
@@ -80,8 +78,6 @@ def str_to_int(velocidade_regulamentada: list[str]):
         if numero_string.isdigit():
             lista_inteiros.append(int(numero_string))
             
-
-
     return lista_inteiros
 
 datas = ["28/04/2022", "11/08/2023", "14/06/2024"]
@@ -91,7 +87,6 @@ for data in datas:
     datas_ano.append(datetime.strptime(data, "%d/%m/%Y"))
 
 enquadramento_lista = ['74550', '54871', '74550', '12345', '74710']
-
 
 def contador_enquadramento(enquadramento_list: list):
     df = pd.read_csv(norm_path, sep=';', encoding='latin1')
@@ -113,7 +108,6 @@ def contador_enquadramento(enquadramento_list: list):
     resultado = {}
 
     for codigo in enquadramento_lista:
-        
         contador[codigo] = contador.get(codigo, 0) + 1
     
     for codigo, ocorrencia in contador.items():

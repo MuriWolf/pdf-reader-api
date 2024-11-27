@@ -12,7 +12,7 @@ from src.security import get_password_hash, verify_password, create_token, get_c
 from src.utils import convert_user_to_public, is_update_from_commom_user_valid
 from datetime import timedelta
 from src.settings import Settings
-
+import logging
 
 settings = Settings()
 
@@ -28,6 +28,9 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
+
+logger = logging.getLogger()
+logger.setLevel(logging.NOTSET)
 
 @app.post("/fines", status_code=status.HTTP_201_CREATED)
 async def post_fine_data(fines_data: List[PdfContentBase], db: db_dependency):
@@ -158,7 +161,7 @@ async def create_data(
 
         color = colors.get_random_rgb()
         while not colors.is_color_different_from_others(background_colors, color):
-         color = colors.get_random_rgb()
+            color = colors.get_random_rgb()
         background_colors.append(color)
         hover_background_colors.append(colors.lighten_color(color))
 
@@ -202,6 +205,7 @@ async def create_data(
                 )
             ]
        )
+    
 
     #marca_veiculo = GraphBar(
     #        label="C",
@@ -218,7 +222,7 @@ async def create_data(
 
     #Grafico Pie ou Doughnut
     natureza = GraphPie(
-        labels = ["Leve", "Grave", "Gravíssima"],
+        labels = ["Leve", "Média", "Grave", "Gravíssima"],
         datasets=[
             GraphPieDataset(
                 label = "Grafico de Natureza da Infração",
@@ -229,6 +233,9 @@ async def create_data(
         ]
     )
     
+    # logger.debug(natureza_list)
+    # logger.debug(contador.cores_natureza(natureza_list))
+
     velocidade_regulamentada= GraphPie(
         labels = ["50Km" , "60Km", "70Km", "80Km", "90Km", "100Km"],
         datasets=[

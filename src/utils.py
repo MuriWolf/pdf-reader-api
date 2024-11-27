@@ -1,6 +1,8 @@
 from src.schemas import UserPublic, UserUpdate
 from src.models import User
 
+
+
 def convert_user_to_public(user: User) -> UserPublic:
     return UserPublic(
        id=user.id_user,
