@@ -1,0 +1,5 @@
+from .retornar_dados_natureza import retornar_dados_natureza
+from .retornar_dados_velocidade_regulamentada import retornar_dados_velocidade_regulamentada
+from .retonar_dados_enquadramento import retornar_dados_enquadramento
+from .retornar_dados_marca import retornar_dados_marca
+from .retornar_dados_data_da_infracao import retornar_dados_data_da_infracao
