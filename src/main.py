@@ -6,13 +6,16 @@ from typing import List, Annotated
 import src.models as models
 from src.database import engine, SessionLocal
 from sqlalchemy.orm import Session
-from src.functions import contadores, leitor_final, colors
-from src.schemas import UserBase, UserPublic, UserUpdate, PdfContentBase, TrafficViolationBase, Token, UserLogin, MessageResponse, TokenData, GraphicData, Color, Dataset, ChartResponse, GraphLine, GraphBar, GraphPie, GraphPieDataset, GraphLineDataset, GraphBarDataset
+from src.fines.readers import reader
+from src.fines.graphs import colors, create_data
+from src.schemas import UserBase, UserPublic, UserUpdate, PdfContentBase, Token, UserLogin, MessageResponse, ChartResponse, GraphLine, GraphBar, GraphPie, GraphPieDataset, GraphLineDataset, GraphBarDataset
 from src.security import get_password_hash, verify_password, create_token, get_current_user, validate_refresh_token
 from src.utils import convert_user_to_public, is_update_from_commom_user_valid
 from datetime import timedelta
 from src.settings import Settings
 import logging
+from src.fines.graphs.constants import CORES_NATUREZAS_MULTA
+from src.fines.graphs.create_data import retornar_dados_enquadramento, retornar_dados_data_da_infracao, retornar_dados_marca, retornar_dados_natureza, retornar_dados_velocidade_regulamentada 
 
 settings = Settings()
 
@@ -35,7 +38,7 @@ logger.setLevel(logging.NOTSET)
 @app.post("/fines", status_code=status.HTTP_201_CREATED)
 async def post_fine_data(fines_data: List[PdfContentBase], db: db_dependency):
     for fine in fines_data: 
-        fine_values = leitor_final.main(fine.text)
+        fine_values = reader.main(fine.text)
         # return fine_values
         db_fine = models.PDF(**fine_values, user_id=fine.userId, data_envio=fine.dataEnvio)
         db.add(db_fine)
@@ -139,7 +142,7 @@ async def create_data(
 
     anos = ["2021","2022", "2023", "2024"]
 
-    color1 = colors.get_random_rgb()
+    color1 = colors.retornar_rgb_aleatorio()
         
     #Contador de Ocorrencias
     
@@ -151,19 +154,19 @@ async def create_data(
         enquadramento_data.append(fine.enquadramento)
         endereco_data.append(fine.endereco_infracao)
 
-        color = colors.get_random_rgb()
-        while not colors.is_color_different_from_others(background_colors, color):
-            color = colors.get_random_rgb()
+        color = colors.retornar_rgb_aleatorio()
+        while not colors.verificar_cor_diferente_das_existentes(background_colors, color):
+            color = colors.retornar_rgb_aleatorio()
 
         background_colors.append(color)
-        hover_background_colors.append(colors.lighten_color(color))
+        hover_background_colors.append(colors.clarear_cor(color))
 
     #Funções para contagem de ocorrencias de determinados dados com suas respecitvos rotulos(labels)
-    natureza_dict = contadores.contar_natureza(natureza_data)
-    velocidade_dict = contadores.contar_velocidade(velocidade_regulamentada_data)
-    data_dict = contadores.contar_data(data_infracao_data)
-    marca_dict = contadores.contar_marca(marca_veiculo_data)
-    enquadramento_dict = contadores.contar_enquadramento(enquadramento_data)
+    natureza_dict = retornar_dados_natureza(natureza_data)
+    velocidade_dict = retornar_dados_velocidade_regulamentada(velocidade_regulamentada_data)
+    data_dict = retornar_dados_data_da_infracao(data_infracao_data)
+    marca_dict = retornar_dados_marca(marca_veiculo_data)
+    enquadramento_dict = retornar_dados_enquadramento(enquadramento_data)
 
     #Grafico de Linhas
     data_infracao_graph = GraphLine(
@@ -172,9 +175,9 @@ async def create_data(
                 GraphLineDataset(
                     label = "Grafico de Data da Infração (Por Ano)",
                     fill = True,
-                    backgroundColor = colors.convert_to_rgba(color1, 0.3),
+                    backgroundColor = colors.converter_para_rgba(color1, 0.3),
                     lineTension = 0.3,
-                    borderColor = colors.lighten_color(color),
+                    borderColor = colors.clarear_cor(color),
                     borderCapStyle = 'butt',
                     borderDash = [],
                     borderDashOffset =  0.0,
@@ -199,9 +202,9 @@ async def create_data(
                 GraphBarDataset(
                     label= enquadramento_dict['descricao'],
                     data = list(enquadramento_dict['data']),
-                    backgroundColor=colors.convert_list_to_rgba(enquadramento_dict['backgroundcolor'], 0.4),
+                    backgroundColor=colors.converter_lista_para_rgba(enquadramento_dict['backgroundcolor'], 0.4),
                     borderWidth=2,
-                    borderColor=colors.convert_list_to_rgba(enquadramento_dict['hovercolor'], 1.0)
+                    borderColor=colors.converter_lista_para_rgba(enquadramento_dict['hovercolor'], 1.0)
                 )
             ]
        )
@@ -212,9 +215,9 @@ async def create_data(
             GraphBarDataset(
                 label=marca_dict['label'],
                 data=marca_dict['data'],
-                backgroundColor = colors.convert_list_to_rgba(marca_dict['BackgroundColor'], 0.4),
+                backgroundColor = colors.converter_lista_para_rgba(marca_dict['BackgroundColor'], 0.4),
                 borderWidth= 2,
-                borderColor=colors.convert_list_to_rgba(marca_dict['HoverColor'], 1.0)
+                borderColor=colors.converter_lista_para_rgba(marca_dict['HoverColor'], 1.0)
             )
         ]
     )
@@ -226,14 +229,12 @@ async def create_data(
             GraphPieDataset(
                 label = "Grafico de Natureza da Infração",
                 data=natureza_dict.values(),
-                backgroundColor=contadores.criar_cor_natureza(natureza_data)["BackgroundColor"],
-                hover_backgroundColor=contadores.criar_cor_natureza(natureza_data)["HoverColor"]
+                backgroundColor=CORES_NATUREZAS_MULTA["backgroundColor"],
+                hover_backgroundColor=CORES_NATUREZAS_MULTA["hover_backgroundColor"]
             )
         ]
     )
     
-    #logger.debug(natureza_list)
-    #logger.debug(contador.cores_natureza())
     velocidade_regulamentada_graph= GraphPie(
         labels = velocidade_dict['label'],
         datasets=[
@@ -254,7 +255,6 @@ def read_users_me(
         current_user: models.User = Depends(get_current_user)
     ):
     return convert_user_to_public(current_user)
-
 
 @app.patch('/users/{user_id}', response_model=UserPublic, status_code=status.HTTP_200_OK) 
 def update_user(
@@ -348,5 +348,3 @@ def refresh_access_token(
     new_access_token = create_token(data={'sub': user.email, 'role': user.role.value}, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
 
     return {'access_token': new_access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
-
-
