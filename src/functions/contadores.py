@@ -155,15 +155,18 @@ def contar_enquadramento(enquadramentos_data: list):
     
     for codigo, ocorrencia in contador.items():
         descricao = codigos.get(codigo, "Descrição Não Encontrada")
-        resultado[codigo] = ocorrencia
+        resultado[codigo] =  {"descricao": descricao, "ocorrencias": ocorrencia}
 
     return{
         "codigo": resultado.keys(),
-        "descricao": resultado.keys(),
+        "descricao":  [item["descricao"] for item in resultado.values()],
         "backgroundcolor": backgroundcolor,
         "hovercolor": hovercolor,
-        "data": resultado.values(),
+        "data": [item["ocorrencias"] for item in resultado.values()],
     } 
+enquadramento = contar_enquadramento(enquadramento_lista)
+
+print(enquadramento['descricao'])
 
 def contar_velocidade(velocidade_dados: list):
     ocorrencias = defaultdict(int)

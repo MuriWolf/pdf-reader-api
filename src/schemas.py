@@ -47,7 +47,7 @@ class GraphPieDataset(BaseModel):
     hover_backgroundColor: list[str] 
 
 class GraphBarDataset(BaseModel):
-    label: str
+    label: list[str]
     data: list[int]
     backgroundColor: list[str]
     borderWidth: int

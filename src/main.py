@@ -197,7 +197,7 @@ async def create_data(
             labels = enquadramento_dict['codigo'],
             datasets=[
                 GraphBarDataset(
-                    label= "Enquadramento",
+                    label= enquadramento_dict['descricao'],
                     data = list(enquadramento_dict['data']),
                     backgroundColor=colors.convert_list_to_rgba(enquadramento_dict['backgroundcolor'], 0.4),
                     borderWidth=2,
@@ -210,7 +210,7 @@ async def create_data(
         labels = marca_dict["label"],
         datasets=[
             GraphBarDataset(
-                label="Multas registradas por Marca",
+                label=marca_dict['label'],
                 data=marca_dict['data'],
                 backgroundColor = colors.convert_list_to_rgba(marca_dict['BackgroundColor'], 0.4),
                 borderWidth= 2,
